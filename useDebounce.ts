@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function useDebounce(
   onSubmit: () => void,
@@ -17,4 +17,33 @@ function useDebounce(
     isRunned.current = true;
   }, [dependencies, onSubmit, delay]);
 }
-export default useDebounce;
+
+function useDebounceEffect(
+  onSubmit: () => void,
+  dependencies: Array<any>,
+  delay: number
+) {
+  useEffect(() => {
+    const handleOnSubmit = setTimeout(() => {
+      onSubmit();
+    }, delay);
+
+    return () => clearTimeout(handleOnSubmit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, dependencies);
+}
+
+function useDebounceFunc() {
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  return (onSubmit: () => void, delay: number = 1000) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    const newTimer = setTimeout(() => {
+      onSubmit();
+    }, delay);
+    setTimer(newTimer);
+  };
+}
+export { useDebounceEffect, useDebounceFunc, useDebounce };
